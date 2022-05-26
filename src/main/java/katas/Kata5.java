@@ -19,6 +19,6 @@ public class Kata5 {
     public static Double execute() {
         List<Movie> movies = DataUtil.getMovies();
 
-        return 3.0;
+        return movies.stream().map(Movie::getRating).reduce((prev, current) -> current > prev ? current : prev).orElse(0D);
     }
 }
