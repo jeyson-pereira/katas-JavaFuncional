@@ -2,10 +2,14 @@ package katas;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import model.BoxArt;
 import util.DataUtil;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /*
     Goal: Create a datastructure from the given data:
@@ -63,8 +67,20 @@ public class Kata11 {
         List<Map> boxArts = DataUtil.getBoxArts();
         List<Map> bookmarkList = DataUtil.getBookmarkList();
 
-        return ImmutableList.of(ImmutableMap.of("name", "someName", "videos", ImmutableList.of(
-                ImmutableMap.of("id", 5, "title", "The Chamber", "time", 123, "boxart", "someUrl")
-        )));
+        return lists.stream().map(list ->
+                        ImmutableMap.of("name", list.get("name"), "videos",
+                                videos.stream().filter(video -> list.get("id").equals(video.get("listId")))
+                                        .map(videoStructure(boxArts, bookmarkList)).collect(Collectors.toUnmodifiableList())))
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    public static Function<Map, ImmutableMap<String, Object>> videoStructure(List<Map> boxArts, List<Map> bookmarkList) {
+        return video -> ImmutableMap.of("id",video.get("id"),"title", video.get("title"),"time",
+                bookmarkList.stream().filter(bookmark -> bookmark.get("videoId").equals(video.get("id")))
+                        .findFirst().get().get("time"),"boxart",
+                boxArts.stream().filter(boxarts -> boxarts.get("videoId").equals(video.get("id")))
+                        .reduce((a,b) -> (int)a.get("height")*(int)a.get("width") < (int)b.get("height")*(int)b.get("width") ? a : b)
+                        .map(boxArt -> (String) boxArt.get("url")).orElse("")
+                );
     }
 }

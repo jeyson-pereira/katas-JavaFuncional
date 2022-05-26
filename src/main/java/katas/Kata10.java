@@ -5,9 +5,11 @@ import com.google.common.collect.ImmutableMap;
 import model.MovieList;
 import util.DataUtil;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /*
     Goal: Create a datastructure from the given data:
@@ -55,9 +57,11 @@ public class Kata10 {
         List<Map> lists = DataUtil.getLists();
         List<Map> videos = DataUtil.getVideos();
 
-        return ImmutableList.of(ImmutableMap.of("name", "someName", "videos", ImmutableList.of(
-                ImmutableMap.of("id", 5, "title", "The Chamber"),
-                ImmutableMap.of("id", 3, "title", "Fracture")
-        )));
+        return lists.stream().map(list ->
+                ImmutableMap.of("name", list.get("name"), "videos",
+                        videos.stream().filter(video -> list.get("id").equals(video.get("listId")))
+                        .map(data -> ImmutableMap.of("id", data.get("id"),"title",  data.get("title")))
+                                .collect(Collectors.toUnmodifiableList())))
+                .collect(Collectors.toUnmodifiableList());
     }
 }
